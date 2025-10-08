@@ -53,7 +53,7 @@ export default function MyPlaces({ navigation }) {
                             <Text>{item.address}</Text>
                             <View>
                                 <Button
-                                    onPress={() => navigation.navigate('Map', { address })}
+                                    onPress={() => navigation.navigate('Map', { address: item.address })}
                                     title="show on map" />
                             </View>
                         </View>

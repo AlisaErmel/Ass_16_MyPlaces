@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, Button, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, Alert } from 'react-native';
+import { StyleSheet, Alert, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useState, useRef, useEffect } from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -45,64 +45,61 @@ export default function App({ route }) {
     }, []);
 
     const handleFetch = () => {
-        Keyboard.dismiss();
+        const query = address || addr; // use route param first, fallback to input
 
-        fetch(`https://geocode.maps.co/search?q=${encodeURIComponent(addr)}&api_key=${API_KEY}`)
+        if (!query) {
+            Alert.alert("No address provided");
+            return;
+        }
+
+        fetch(`https://geocode.maps.co/search?q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
                 if (data.length > 0) {
-                    const first = data[0];
-                    const newLat = parseFloat(first.lat);
-                    const newLon = parseFloat(first.lon);
+                    const { lat, lon } = data[0];
+                    const newLat = parseFloat(lat);
+                    const newLon = parseFloat(lon);
 
                     setLat(newLat);
                     setLon(newLon);
-                    setAddr("");
 
-                    mapRef.current.animateToRegion({
+                    mapRef.current?.animateToRegion({
                         latitude: newLat,
                         longitude: newLon,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
-                    }, 1000); // duration in ms
+                    }, 1000);
                 } else {
-                    console.log("No results found");
+                    Alert.alert("No results found for the provided address");
                 }
             })
             .catch(err => console.error("Fetch error:", err));
-    }
+    };
+
 
     return (
         <SafeAreaProvider>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <SafeAreaView style={styles.container}>
-                    <MapView
-                        ref={mapRef}
-                        style={styles.map}
-                    >
-                        {lat && lon &&
-                            <Marker
-                                coordinate={{
-                                    latitude: lat,
-                                    longitude: lon
-                                }}
-                            />}
+            <SafeAreaView style={styles.container}>
+                <MapView
+                    ref={mapRef}
+                    style={styles.map}
+                >
+                    {lat && lon &&
+                        <Marker
+                            coordinate={{
+                                latitude: lat,
+                                longitude: lon
+                            }}
+                        />}
 
-                    </MapView>
+                </MapView>
 
-                    <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
-                        style={styles.searchContainer}
-                    >
-                        <Button
-                            title="Show"
-                            value={address}
-                            onPress={handleFetch}
-                        />
-                    </KeyboardAvoidingView>
-                    <StatusBar style="auto" />
-                </SafeAreaView>
-            </TouchableWithoutFeedback>
+                <Button
+                    title="Show"
+                    onPress={handleFetch}
+                />
+                <StatusBar style="auto" />
+            </SafeAreaView>
         </SafeAreaProvider>
     );
 }
@@ -129,15 +126,5 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 5,
         elevation: 5,
-    },
-
-    textInput: {
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 10,
-        marginBottom: 10,
-        backgroundColor: '#fff',
     },
 });
