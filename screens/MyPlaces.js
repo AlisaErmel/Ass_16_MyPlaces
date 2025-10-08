@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, TextInput, TouchableOpacity, FlatList, View, Text } from "react-native";
-import { ref, push, onValue } from 'firebase/database';
+import { StyleSheet, TextInput, TouchableOpacity, FlatList, View, Text, Alert } from "react-native";
+import { ref, push, onValue, remove } from 'firebase/database';
 import { db } from '../firebaseConfig';
 
 export default function MyPlaces({ navigation }) {
@@ -33,6 +33,21 @@ export default function MyPlaces({ navigation }) {
         }
     }
 
+    const handleDelete = (id) => {
+        Alert.alert(
+            "Delete Address",
+            "Are you sure you want to delete this address?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => remove(ref(db, `addresses/${id}`))
+                }
+            ]
+        );
+    }
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
@@ -55,15 +70,20 @@ export default function MyPlaces({ navigation }) {
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={{ paddingVertical: 10 }}
                     renderItem={({ item }) => (
-                        <View style={styles.listItem}>
-                            <Text style={styles.itemText}>{item.address}</Text>
-                            <TouchableOpacity
-                                style={styles.mapButton}
-                                onPress={() => navigation.navigate('Map', { address: item.address })}
-                            >
-                                <Text style={styles.mapButtonText}>Show on Map</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            onLongPress={() => handleDelete(item.id)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.listItem}>
+                                <Text style={styles.itemText}>{item.address}</Text>
+                                <TouchableOpacity
+                                    style={styles.mapButton}
+                                    onPress={() => navigation.navigate('Map', { address: item.address })}
+                                >
+                                    <Text style={styles.mapButtonText}>Show on Map</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
                     )}
                 />
             </SafeAreaView>
