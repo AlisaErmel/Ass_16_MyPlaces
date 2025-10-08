@@ -10,7 +10,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="My Places" component={MyPlaces} />
-        {/*<Stack.Screen name="Map" component={Map} />*/}
+        <Stack.Screen name="Map" component={Map} />
       </Stack.Navigator>
     </NavigationContainer>
   );

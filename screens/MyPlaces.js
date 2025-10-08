@@ -4,7 +4,7 @@ import { StyleSheet, TextInput, Button, FlatList, View, Text } from "react-nativ
 import { ref, push, onValue } from 'firebase/database';
 import { db } from '../firebaseConfig';
 
-export default function MyPlaces() {
+export default function MyPlaces({ navigation }) {
     const [address, setAddress] = useState("");
     const [items, setItems] = useState([]);
 
@@ -51,6 +51,11 @@ export default function MyPlaces() {
                     renderItem={({ item }) =>
                         <View style={{ flexDirection: 'row' }}>
                             <Text>{item.address}</Text>
+                            <View>
+                                <Button
+                                    onPress={() => navigation.navigate('Map', { address })}
+                                    title="show on map" />
+                            </View>
                         </View>
                     }
                 />
